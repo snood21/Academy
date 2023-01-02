@@ -240,7 +240,7 @@ public:
 	}
 };
 
-Human* HumanFactory(std::string* arr_str)
+Human* HumanFactory(const std::string* arr_str)
 {
   Human* returned_element = nullptr;
   if (arr_str[0].find ("Student") != std::string::npos)

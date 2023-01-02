@@ -2,12 +2,16 @@
 #include<fstream>
 #include<string>
 #include <cstring>
+#include <unordered_set>
 using namespace std;
 
 #define delimiter "\n---------------------------------------------\n"
 
 #define HUMAN_TAKE_PARAMETERS	const std::string& last_name, const std::string& first_name, unsigned int age
 #define HUMAN_GIVE_PARAMETERS	last_name, first_name, age
+
+class Human;
+Human** load_from_file(const std::string& filename, int& group_count);
 
 class Human
 {
@@ -56,7 +60,7 @@ public:
 	//						Methods:
 	virtual std::ostream& info(std::ostream& os)const
 	{
-		return os << last_name << " " << first_name << " " << age << " лет,";
+		return os << last_name << " " << first_name << " " << age << " лет, ";
 	}
         
         virtual std::ofstream& save_to_file(std::ofstream& fout)const
@@ -73,8 +77,8 @@ std::ostream& operator<<(std::ostream& os, const Human& obj)
 
 std::ofstream& operator<<(std::ofstream& fout, const Human& obj)
 {
-  obj.save_to_file (fout);
-  return fout;
+  return obj.save_to_file (fout);
+  //return fout;
 }
 
 #define STUDENT_TAKE_PARAMETERS	const std::string& speciality, const std::string& group, double rating, double attendance
@@ -137,11 +141,10 @@ public:
 	//					Methods:
 	std::ostream& info(std::ostream& os)const 
 	{
-		return Human::info(os) << speciality << " " << group << " " << rating << " " << attendance;
+		return Human::info(os) << speciality << " " << group << " " << rating << " " << attendance << " ";
 	}
         std::ofstream& save_to_file(std::ofstream& fout)const 
 	{
-            fout << "Student#";
             Human::save_to_file(fout) << "#" << speciality << "#" << group << "#" << rating << "#" << attendance;
             return fout;
 	}
@@ -187,12 +190,11 @@ public:
 	//					Methods:
 	std::ostream& info(std::ostream& os)const 
 	{
-		return Human::info(os) << speciality << " " << experience;
+		return Human::info(os) << speciality << " " << experience << " ";
 	}
         std::ofstream& save_to_file(std::ofstream& fout)const 
 	{
-		fout << "Teacher#";
-                Human::save_to_file(fout) << "#" << speciality << "#" << experience;
+		Human::save_to_file(fout) << "#" << speciality << "#" << experience;
                 return fout;
 	}
 };
@@ -229,15 +231,40 @@ public:
 	//				Methods:
 	std::ostream& info(std::ostream& os)const 
 	{
-		return Student::info(os) << subject;
+		return Student::info(os) << subject << " ";
 	}
         std::ofstream& save_to_file(std::ofstream& fout)const 
 	{
-                fout << "Graduate#";
                 Student::save_to_file(fout) << "#" << subject;
                 return fout;
 	}
 };
+
+Human* HumanFactory(std::string* arr_str)
+{
+  Human* returned_element = nullptr;
+  if (arr_str[0].find ("Student") != std::string::npos)
+    {
+      unsigned int age = std::stoi (arr_str[3]);
+      double rating = std::stod (arr_str[6]);
+      double attendance = std::stod (arr_str[7]);
+      returned_element = new Student (arr_str[1], arr_str[2], age, arr_str[4], arr_str[5], rating, attendance);
+    }
+  else if (arr_str[0].find ("Teacher") != std::string::npos)
+    {
+      unsigned int age = std::stoi (arr_str[3]);
+      unsigned int experience = std::stoi (arr_str[5]);
+      returned_element = new Teacher (arr_str[1], arr_str[2], age, arr_str[4], experience);
+    }
+  else if (arr_str[0].find ("Graduate") != std::string::npos)
+    {
+      unsigned int age = std::stoi (arr_str[3]);
+      double rating = std::stod (arr_str[6]);
+      double attendance = std::stod (arr_str[7]);
+      returned_element = new Graduate (arr_str[1], arr_str[2], age, arr_str[4], arr_str[5], rating, attendance, arr_str[8]);
+    }
+  return returned_element;
+}
 
 //#define INHERITANCE
 #define POLYMORPHISM
@@ -292,105 +319,8 @@ int main()
 	p_human1->info();
 	p_human2->info();*/
 #ifdef LOAD_FROM_FILE
-        std::ifstream fin("group.txt");
-        int count_of_strings = {0};
-                
-        if (!fin.is_open())
-          {
-            std::cerr << "Error: file not found" << endl;
-            return 2;
-          }
-          
-        std::string str;
-        while (!fin.eof ())
-          {
-            getline (fin, str);
-            if (str != "")
-              {
-                count_of_strings++;
-              }
-          }
-        fin.clear ();
-        fin.seekg (0);
-
-        Human* group[count_of_strings];
-        
-        for (int i = 0; i < count_of_strings; i++)
-          {
-            
-            const int SIZE = 256;
-            char buffer[SIZE] = {};
-            fin.getline(buffer, SIZE);
-            
-            std::string arr_str[10];
-            int count_values = {0};
-                        
-            char delimiters[] = "#";
-            for (char* pch = std::strtok (buffer, delimiters); pch; pch = std::strtok(NULL, delimiters))
-            {
-                arr_str[count_values++] = pch;
-            }
-            
-            if (count_values==8)
-              {
-                unsigned int age = std::stoi (arr_str[3]);
-                double rating = std::stod (arr_str[6]);
-                double attendance = std::stod (arr_str[7]);
-                group[i] = new Student (arr_str[1], arr_str[2], age, arr_str[4], arr_str[5], rating, attendance);
-              }
-            else if (count_values == 6)
-              {
-                unsigned int age = std::stoi (arr_str[3]);
-                unsigned int experience = std::stoi (arr_str[5]);
-                group[i] = new Teacher (arr_str[1], arr_str[2], age, arr_str[4], experience);
-              }
-            else if (count_values == 10)
-              {
-                unsigned int age = std::stoi (arr_str[4]);
-                double rating = std::stod (arr_str[7]);
-                double attendance = std::stod (arr_str[8]);
-                group[i] = new Graduate (arr_str[2], arr_str[3], age, arr_str[5], arr_str[6], rating, attendance, arr_str[9]);
-              }
-                        
-            /*std::string type;
-            std::string last_name;
-            std::string first_name;
-            unsigned int age;
-
-            std::string speciality;
-            std::string st_group;
-            double rating;
-            double attendance;
-            unsigned int experience;
-            std::string subject;
-
-            fin >> type;
-
-            if (type == "Student")
-              {
-                fin >> last_name >> first_name >> age;
-                fin >> speciality >> st_group >> rating >> attendance;
-                group[i] = new Student (last_name, first_name, age, speciality, st_group, rating, attendance);
-              }
-            else if (type == "Teacher")
-              {
-                fin >> last_name >> first_name >> age;
-                fin >> speciality >> experience;
-                group[i] = new Teacher (last_name, first_name, age, speciality, experience);
-              }
-            else if (type == "Graduate")
-              {
-                fin >> type;
-                fin >> last_name >> first_name >> age;
-                fin >> speciality >> st_group >> rating >> attendance;
-                int SIZE = {256};
-                char buffer[SIZE] = {};
-                fin.getline (buffer, SIZE);
-                subject.append (buffer);
-                group[i] = new Graduate (last_name, first_name, age, speciality, st_group, rating, attendance, subject);
-              }
-            */
-            }
+        int group_count = {0};
+        Human** group = load_from_file ("group.txt", group_count);
 #else
 	//Generalisation:
 	Human* group[] =
@@ -404,7 +334,11 @@ int main()
 #endif
         
 	cout << delimiter << endl;
+#ifdef LOAD_FROM_FILE
+        for (int i = 0; i < group_count; i++)
+#else
 	for (int i = 0; i < sizeof(group) / sizeof(Human*); i++)
+#endif
 	{
 		cout << *group[i] << endl;
 		cout << delimiter << endl;
@@ -415,7 +349,8 @@ int main()
                 
         for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
 	{
-		fout << *group[i] << endl;
+            fout << typeid(*group[i]).name () << "#";
+            fout << *group[i] << endl;
 	}
         fout.close();
 #endif
@@ -426,4 +361,49 @@ int main()
 	}
 #endif // POLYMORPHISM
 
+}
+
+Human** load_from_file(const std::string& filename, int& group_count)
+{
+  Human** group = nullptr;
+  std::ifstream fin (filename);
+  
+  if (!fin.is_open ())
+    {
+      std::cerr << "Error: file not found" << endl;
+      return group;
+    }
+
+  std::string str;
+  while (!fin.eof ())
+    {
+      getline (fin, str);
+      if (str != "")
+        {
+          group_count++;
+        }
+    }
+  fin.clear ();
+  fin.seekg (0);
+
+  group = new Human*[group_count] {};
+
+  for (int i = 0; i < group_count; i++)
+    {
+      const int SIZE = 256;
+      char buffer[SIZE] = {};
+      fin.getline (buffer, SIZE);
+
+      std::string arr_str[9];
+      int count_values = {0};
+
+      char delimiters[] = "#";
+      for (char* pch = std::strtok (buffer, delimiters); pch; pch = std::strtok (NULL, delimiters))
+        {
+          arr_str[count_values++] = pch;
+        }
+
+      group[i] = HumanFactory (arr_str);
+    }
+  return group;
 }

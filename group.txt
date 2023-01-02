@@ -1,5 +1,5 @@
-Student#Pinkman#Jessie#25#Chemistry#WW_220#80#90
-Teacher#White#Walter#50#Chemistry#25
-Graduate#Student#Schrader#Hank#40#Criminalistic#OBN#85#80#How to catch Heisenberg
-Student#Vercetti#Tomas#30#Criminalistic#Vice#85#98
-Teacher#Diaz#Ricardo#50#Weapons ditribution#20
+7Student#Pinkman#Jessie#25#Chemistry#WW_220#80#90
+7Teacher#White#Walter#50#Chemistry#25
+8Graduate#Schrader#Hank#40#Criminalistic#OBN#85#80#How to catch Heisenberg
+7Student#Vercetti#Tomas#30#Criminalistic#Vice#85#98
+7Teacher#Diaz#Ricardo#50#Weapons ditribution#20
